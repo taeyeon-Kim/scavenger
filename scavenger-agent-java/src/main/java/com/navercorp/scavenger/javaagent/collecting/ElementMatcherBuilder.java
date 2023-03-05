@@ -71,7 +71,7 @@ public class ElementMatcherBuilder {
 
         if (config.isExcludeGetterSetter()) {
             ElementMatcher.Junction<MethodDescription> kotlinComponent
-                = takesNoArguments().and(not(returns(TypeDescription.VOID))).and(nameMatches("component\\d+"));
+                = takesNoArguments().and(not(returns(TypeDescription.ForLoadedType.of(void.class)))).and(nameMatches("component\\d+"));
 
             matcher = matcher.and(not(
                 isGetter().or(isSetter()).or(kotlinComponent)
@@ -82,10 +82,13 @@ public class ElementMatcherBuilder {
         switch (config.getMethodVisibility()) {
             case PRIVATE:
                 visibilityMatcher = visibilityMatcher.or(isPrivate());
+                break;
             case PACKAGE_PRIVATE:
                 visibilityMatcher = visibilityMatcher.or(isPackagePrivate());
+                break;
             case PROTECTED:
                 visibilityMatcher = visibilityMatcher.or(isProtected());
+                break;
             case PUBLIC:
                 visibilityMatcher = visibilityMatcher.or(isPublic());
         }
