@@ -185,7 +185,6 @@ class GarbageCollectServiceTest {
         }
 
         @Test
-        @DisplayName("it deletes marked methods")
         fun sweepMethods_sweepMarkMethod() {
             sut.markMethods(customerId)
             assertThat(methodDao.findAllByCustomerId(customerId).filter { it.garbage }).hasSize(2)
@@ -213,7 +212,6 @@ class GarbageCollectServiceTest {
         }
 
         @Test
-        @DisplayName("it deletes marked methods")
         fun sweepMethods_sweepMarkMethodWithInvocationUpdate() {
             sut.markMethods(customerId)
             assertThat(methodDao.findAllByCustomerId(customerId).filter { it.garbage }).hasSize(2)
