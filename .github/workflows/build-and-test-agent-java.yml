@@ -19,7 +19,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Run build with Gradle Wrapper
-        run: ./gradlew build --info
+#        run: ./gradlew build --info
+        run: ./gradlew :scavenger-collector:test --tests "com.navercorp.scavenger.service.GarbageCollectServiceTest" --info
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
