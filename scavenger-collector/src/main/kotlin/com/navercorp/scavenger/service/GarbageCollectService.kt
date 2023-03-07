@@ -135,6 +135,7 @@ class GarbageCollectService(
                 codeBaseFingerprintDao.findAllByCustomerId(customerId).minOfOrNull { it.createdAt }?.toEpochMilli()
             } ?: return
 
+            logger.info("garbageDeadline: $garbageDeadline")
             methodDao.updateSetGarbageLastSeenBefore(customerId, garbageDeadline - 1)
                 .also { updatedCount ->
                     logger.info { "[$customerId] $updatedCount methods as marked as garbage " }
