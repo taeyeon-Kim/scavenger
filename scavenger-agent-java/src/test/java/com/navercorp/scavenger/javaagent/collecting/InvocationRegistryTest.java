@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collection;
 import java.util.Properties;
 
+import lombok.extern.java.Log;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,6 +18,7 @@ import com.navercorp.scavenger.model.InvocationDataPublication;
 // FIXME flaky test
 @Nested
 @DisplayName("InvocationRegistry class")
+@Log
 public class InvocationRegistryTest {
     InvocationRegistry sut;
 
@@ -101,10 +104,11 @@ public class InvocationRegistryTest {
         @Nested
         @DisplayName("if hash is registered")
         class HashRegisteredTest {
-            String hash = "hash";
+            private final String hash = "hash";
 
             @BeforeEach
             public void registerHash() {
+                log.info("BeforeEach: " + hash);
                 sut.register(hash);
             }
 

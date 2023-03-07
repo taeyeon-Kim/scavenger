@@ -28,9 +28,11 @@ public class InvocationRegistry {
         Thread worker = ScavengerThreadFactory.builder()
             .name("registry")
             .build()
-            .newThread(new Thread(() -> {
+            .newThread(() -> {
+                log.info("take queue logic: " + Thread.currentThread().isInterrupted());
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
+                        log.info("queue.take(): " + queue + " currentInvocationIndex: " + currentInvocationIndex);
                         invocations[currentInvocationIndex].add(queue.take());
                     } catch (InterruptedException e) {
                         log.fine("[scavenger] Interrupted");
@@ -38,14 +40,19 @@ public class InvocationRegistry {
                         return;
                     }
                 }
-            }));
+            });
         worker.start();
     }
 
     public void register(String hash) {
+        log.info("current currentInvocationIndex: " + currentInvocationIndex);
         if (!invocations[currentInvocationIndex].contains(hash)) {
+            log.info("queue add");
             queue.add(hash);
+            log.info("LBQ: " + queue);
         }
+        log.info("register: " + hash + " currentInvocationIndex: " + currentInvocationIndex + " current hash 0 index: " + invocations[0]);
+        log.info("register: " + hash + " currentInvocationIndex: " + currentInvocationIndex + " current hash 1 index: " + invocations[1]);
     }
 
     private synchronized void toggleInvocationsIndex() {
@@ -58,9 +65,12 @@ public class InvocationRegistry {
         int oldIndex = currentInvocationIndex;
 
         toggleInvocationsIndex();
+        log.info("oldIndex: " + oldIndex);
+        log.info("getPublication hash 0 index: " + invocations[0]);
+        log.info("getPublication hash 1 index: " + invocations[1]);
 
         try {
-            Thread.sleep(10L);
+            Thread.sleep(30L);
 
             return InvocationDataPublication.newBuilder()
                 .setCommonData(

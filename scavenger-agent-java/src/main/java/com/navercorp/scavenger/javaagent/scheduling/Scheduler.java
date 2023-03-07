@@ -49,9 +49,9 @@ public class Scheduler implements Runnable {
         this.publisher = publisher;
         this.executor = Executors.newScheduledThreadPool(
             1,
-            ScavengerThreadFactory.builder().
-                name("scheduler").
-                relativePriority(-1)
+            ScavengerThreadFactory.builder()
+                .name("scheduler")
+                .relativePriority(-1)
                 .build()
         );
 
