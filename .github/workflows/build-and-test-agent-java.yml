@@ -1,29 +1,85 @@
-name: Build and Test
+name: Build
 
 on:
   pull_request:
     branches: [ develop, main ]
 
 jobs:
-  build-gradle-project:
+  scavenger-agent-java:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout project sources
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Java JDK
         uses: actions/setup-java@v3
         with:
+          distribution: 'zulu'
           java-version: '11'
-          distribution: 'adopt'
-          architecture: x64
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-      - name: Run build with Gradle Wrapper
-#        run: ./gradlew build --info
-        run: ./gradlew :scavenger-collector:test --tests "com.navercorp.scavenger.service.GarbageCollectServiceTest" --info
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Test with Gradle
+        run: ./gradlew :scavenger-agent-java:clean scavenger-agent-java:build
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          report_individual_runs: true
-          junit_files: "**/build/test-results/**/*.xml"
+          comment_title: "Scavenger Agent java Test Results"
+          junit_files: "scavenger-agent-java/build/test-results/**/*.xml"
+  scavenger-collector:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Test with Gradle
+        run: ./gradlew :scavenger-collector:clean scavenger-collector:build
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          comment_title: "Scavenger Collector Test Results"
+          junit_files: "scavenger-collector/build/test-results/**/*.xml"
+  scavenger-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Test with Gradle
+        run: ./gradlew :scavenger-api:clean scavenger-api:build
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          comment_title: "Scavenger API Test Results"
+          junit_files: "scavenger-api/build/test-results/**/*.xml"
