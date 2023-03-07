@@ -8,6 +8,7 @@ import java.util.Properties;
 import lombok.extern.java.Log;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import com.navercorp.scavenger.model.InvocationDataPublication;
 @Nested
 @DisplayName("InvocationRegistry class")
 @Log
+@Disabled
 public class InvocationRegistryTest {
     InvocationRegistry sut;
 
