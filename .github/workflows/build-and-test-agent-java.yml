@@ -103,6 +103,8 @@ jobs:
           path: scavenger-api/build/test-results
       - name: Display structure of downloaded files
         run: ls -ali scavenger-api/build/test-results
+      - name: Display structure of downloaded files
+        run: ls -ali ${{ github.workspace }}/scavenger-api/build/test-results
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
