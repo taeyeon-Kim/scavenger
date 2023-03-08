@@ -25,12 +25,11 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Test with Gradle
         run: ./gradlew :scavenger-agent-java:clean scavenger-agent-java:build
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
         with:
-          comment_title: "Scavenger Agent java Test Results"
-          junit_files: "scavenger-agent-java/build/test-results/**/*.xml"
+          name: Test Results - Scavenger Agent Java
+          path: scavenger-agent-java/build/test-results
   scavenger-collector:
     runs-on: ubuntu-latest
     steps:
@@ -51,12 +50,11 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Test with Gradle
         run: ./gradlew :scavenger-collector:clean scavenger-collector:build
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v2
         with:
-          comment_title: "Scavenger Collector Test Results"
-          junit_files: "scavenger-collector/build/test-results/**/*.xml"
+          name: Test Results - Scavenger collector
+          path: scavenger-collector/build/test-results
   scavenger-api:
     runs-on: ubuntu-latest
     steps:
@@ -77,9 +75,38 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Test with Gradle
         run: ./gradlew :scavenger-api:clean scavenger-api:build
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v2
         with:
-          comment_title: "Scavenger API Test Results"
-          junit_files: "scavenger-api/build/test-results/**/*.xml"
+          name: Test Results - Scavenger API
+          path: scavenger-api/build/test-results
+  aggregate-test-results:
+    needs: [scavenger-agent-java, scavenger-collector, scavenger-api]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Download test results
+        uses: actions/download-artifact@v2
+        with:
+          name: Test Results - Scavenger Agent Java
+          path: scavenger-agent-java/build/test-results
+      - name: Download test results
+        uses: actions/download-artifact@v2
+        with:
+          name: Test Results - Scavenger collector
+          path: scavenger-collector/build/test-results
+      - name: Download test results
+        uses: actions/download-artifact@v2
+        with:
+          name: Test Results - Scavenger collector
+          path: scavenger-api/build/test-results
+      - name: Aggregate test results
+        run: |
+          cat scavenger-agent-java/build/test-results/**/*.xml scavenger-collector/build/test-results/**/*.xml scavenger-api/build/test-results/**/*.xml > all-tests.xml
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          check_name: All Unit Test Results
+          files: |
+            all-tests.xml
