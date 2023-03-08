@@ -25,11 +25,11 @@ jobs:
             unzip -d "$name" "$name.zip"
           done
       - name: Display structure of downloaded files
-        run: ls -ali artifacts/scavenger-agent-java
+        run: ls -ali artifacts/scavenger-agent-java/test
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           report_individual_runs: true
           check_name: "Scavenger Test Results"
-          junit_files: "artifacts/**/build/test-results/**/*.xml"
+          junit_files: "artifacts/**/**/*.xml"
