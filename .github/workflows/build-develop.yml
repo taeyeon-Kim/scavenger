@@ -1,8 +1,8 @@
-name: Build
+name: Build and Test
 
 on:
   pull_request:
-    branches: [ develop, main ]
+    branches: [ develop ]
 
 jobs:
   scavenger-agent-java:
@@ -80,35 +80,3 @@ jobs:
         with:
           name: Test Results - Scavenger API
           path: scavenger-api/build/test-results
-  aggregate-test-results:
-    needs: [scavenger-agent-java, scavenger-collector, scavenger-api]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Download test results
-        uses: actions/download-artifact@v3
-        with:
-          name: Test Results - Scavenger Agent Java
-          path: scavenger-agent-java/build/test-results
-      - name: Download test results
-        uses: actions/download-artifact@v3
-        with:
-          name: Test Results - Scavenger collector
-          path: scavenger-collector/build/test-results
-      - name: Download test results
-        uses: actions/download-artifact@v3
-        with:
-          name: Test Results - Scavenger collector
-          path: scavenger-api/build/test-results
-      - name: Display structure of downloaded files
-        run: ls -ali scavenger-api/build/test-results/test
-      - name: Display structure of downloaded files
-        run: ls -ali ${{ github.workspace }}/scavenger-api/build/test-results/test
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          report_individual_runs: true
-          check_name: "Scavenger Test Results"
-          junit_files: "**/build/test-results/**/*.xml"
