@@ -24,8 +24,6 @@ jobs:
             gh api $url > "$name.zip"
             unzip -d "$name" "$name.zip"
           done
-      - name: Display structure of downloaded files
-        run: ls -ali artifacts/scavenger-agent-java/test
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
