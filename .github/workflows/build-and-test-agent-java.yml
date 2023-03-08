@@ -101,12 +101,8 @@ jobs:
         with:
           name: Test Results - Scavenger collector
           path: scavenger-api/build/test-results
-      - name: Aggregate test results
-        run: |
-          cat scavenger-agent-java/build/test-results/**/*.xml scavenger-collector/build/test-results/**/*.xml scavenger-api/build/test-results/**/*.xml > all-tests.xml
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
-          check_name: All Unit Test Results
-          files: |
-            all-tests.xml
+          check_name: "Scavenger Test Results"
+          junit_files: "**/build/test-results/**/*.xml"
