@@ -28,7 +28,7 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v3
         with:
-          name: Test Results - Scavenger Agent Java
+          name: scavenger-agent-java
           path: scavenger-agent-java/build/test-results
   scavenger-collector:
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:
-          name: Test Results - Scavenger collector
+          name: scavenger-collector
           path: scavenger-collector/build/test-results
   scavenger-api:
     runs-on: ubuntu-latest
@@ -78,5 +78,5 @@ jobs:
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:
-          name: Test Results - Scavenger API
+          name: scavenger-api
           path: scavenger-api/build/test-results

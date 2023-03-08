@@ -30,4 +30,4 @@ jobs:
         with:
           report_individual_runs: true
           check_name: "Scavenger Test Results"
-          junit_files: "artifacts/**/build/test-results/**/*.xml"
+          junit_files: "artifacts//ㅋ**/build/test-results/**/*.xml"
