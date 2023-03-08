@@ -31,3 +31,48 @@ jobs:
           report_individual_runs: true
           check_name: "Scavenger Test Results"
           junit_files: "artifacts/**/**/*.xml"
+      - name: Comment on Pull Request
+        uses: actions/github-script@v4
+        if: always()
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.workflow_run.head_repository.pull_requests[0].number;
+            const runId = context.payload.workflow_run.id;
+            const checks = await github.checks.listForRef({
+              owner,
+              repo,
+              ref: context.payload.workflow_run.head_sha,
+            });
+            const check = checks.data.check_runs.find(
+              (check) => check.name === "Scavenger Test Results"
+            );
+            const checkUrl = check.html_url;
+            const body = `Unit test results are available at ${checkUrl}.\n\nWorkflow run ID: ${runId}`;
+            const { data: comments } = await github.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
+            const existingComment = comments.find(
+              (comment) =>
+                comment.user.login === "github-actions[bot]" &&
+                comment.body.includes("Unit test results are available at")
+            );
+            if (existingComment) {
+              const commentId = existingComment.id;
+              await github.issues.updateComment({
+                owner,
+                repo,
+                comment_id: commentId,
+                body,
+              });
+            } else {
+              await github.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
