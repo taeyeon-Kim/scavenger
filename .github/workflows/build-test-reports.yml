@@ -29,5 +29,5 @@ jobs:
         if: always()
         with:
           report_individual_runs: true
-          check_name: "Scavenger Test Results"
+          check_name: "Scavenger Test Resultss"
           junit_files: "artifacts/**/build/test-results/**/*.xml"
