@@ -5,7 +5,7 @@ on:
     branches: [ develop ]
 
 jobs:
-  event_file:
+  set-up:
     name: "Event File"
     runs-on: ubuntu-latest
     steps:

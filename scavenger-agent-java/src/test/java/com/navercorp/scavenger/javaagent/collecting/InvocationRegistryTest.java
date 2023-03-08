@@ -20,7 +20,6 @@ import com.navercorp.scavenger.model.InvocationDataPublication;
 @Nested
 @DisplayName("InvocationRegistry class")
 @Log
-@Disabled
 public class InvocationRegistryTest {
     InvocationRegistry sut;
 
