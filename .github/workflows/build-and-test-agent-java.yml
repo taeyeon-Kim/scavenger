@@ -106,7 +106,9 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -ali ${{ github.workspace }}/scavenger-api/build/test-results/test
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
         with:
+          report_individual_runs: true
           check_name: "Scavenger Test Results"
-          junit_files: "scavenger-api/build/test-results/test/*.xml"
+          junit_files: "**/build/test-results/**/*.xml"
