@@ -109,4 +109,4 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
           check_name: "Scavenger Test Results"
-          junit_files: "**/build/test-results/**/*.xml"
+          junit_files: "scavenger-api/build/test-results/test/*.xml"
