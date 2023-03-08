@@ -38,6 +38,7 @@ jobs:
         run: ./gradlew :scavenger-agent-java:test
       - name: Upload test results
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: scavenger-agent-java
           path: scavenger-agent-java/build/test-results
@@ -64,6 +65,7 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew :scavenger-collector:test
       - name: Upload Test Results
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: scavenger-collector
@@ -91,6 +93,7 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew :scavenger-api:test
       - name: Upload Test Results
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: scavenger-api
