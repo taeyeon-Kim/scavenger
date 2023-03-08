@@ -32,8 +32,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        run: ./gradlew :scavenger-agent-java:clean scavenger-agent-java:build -x test
       - name: Test with Gradle
-        run: ./gradlew :scavenger-agent-java:clean scavenger-agent-java:build
+        run: ./gradlew :scavenger-agent-java:test
       - name: Upload test results
         uses: actions/upload-artifact@v3
         with:
@@ -57,8 +59,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        run: ./gradlew :scavenger-collector:clean scavenger-collector:build -x test
       - name: Test with Gradle
-        run: ./gradlew :scavenger-collector:clean scavenger-collector:build
+        run: ./gradlew :scavenger-collector:test
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:
@@ -82,8 +86,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        run: ./gradlew :scavenger-api:clean scavenger-api:build -x test
       - name: Test with Gradle
-        run: ./gradlew :scavenger-api:clean scavenger-api:build
+        run: ./gradlew :scavenger-api:test
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:
