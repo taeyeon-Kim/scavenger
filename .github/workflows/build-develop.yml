@@ -101,18 +101,17 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - uses: mirromutth/mysql-action@v1.1
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
         with:
-          character set server: 'utf8'
-          collation server: 'utf8mb4_0900_as_cs'
-          mysql version: '8.0.28'
-          mysql database: scavenger
-          mysql root password: scavenger
-          mysql user: scavenger
-          mysql password: scavenger
+          character set server: utf8mb4
+          collation server: utf8mb4_bin
+          mysql version: '5.6.17'
+          mysql database: wikidot_notifier_test
+          mysql root password: root
       - name: Wait for MySQL
         run: |
-          while ! mysqladmin ping --host=127.0.0.1 -p scavenger --silent; do
+          while ! mysqladmin ping -h 127.0.0.1 -p root --silent; do
             sleep 1
           done
       - name: Gradle Caching
