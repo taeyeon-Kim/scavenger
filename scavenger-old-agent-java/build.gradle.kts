@@ -5,7 +5,6 @@ plugins {
     java
     `maven-publish`
     signing
-    id("org.hibernate.build.maven-repo-auth") version "3.0.4"
     id("io.freefair.lombok") version "6.5.1"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("org.unbroken-dome.test-sets") version "4.0.0"
@@ -186,6 +185,11 @@ publishing {
                         id.set("junoyoon")
                         name.set("JunHo Yoon")
                         email.set("junoyoon@gmail.com")
+                    }
+                    developer {
+                        id.set("sohyun-ku")
+                        name.set("Sohyun Ku")
+                        email.set("kusohyeon@gmail.com")
                     }
                 }
                 scm {

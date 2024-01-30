@@ -96,15 +96,23 @@ class GarbageCollectService(
      */
     fun sweepAgentStatesAndJvms(customerId: Long, baseDateTime: Instant) {
         try {
-            val agentStates = agentStateDao.findGarbageLastPolledAtBefore(
-                customerId,
-                baseDateTime.minusMillis(intervalService.batchSweepMarginMilliSecond)
-            )
-            // jvm should be deleted first
-            jvmDao.deleteAllByCustomerIdAndUuids(customerId, agentStates.map { it.jvmUuid })
-                .also { logger.info { "[$customerId] $it jvm is swiped. " } }
-            agentStateDao.deleteAllByCustomerIdAndIds(customerId, agentStates.map { it.id })
-                .also { logger.info { "[$customerId] $it agent state is swiped. " } }
+            do {
+                val agentStates = agentStateDao.findAllGarbageLastPolledAtBefore(
+                    customerId,
+                    baseDateTime.minusMillis(intervalService.batchSweepMarginMilliSecond)
+                )
+
+                jvmDao.deleteAllByCustomerIdAndUuids(customerId, agentStates.map { it.jvmUuid })
+                    .also { logger.info { "[$customerId] $it jvm is swiped. " } }
+                agentStateDao.deleteAllByCustomerIdAndIds(customerId, agentStates.map { it.id })
+                    .also { logger.info { "[$customerId] $it agent state is swiped. " } }
+            } while (agentStates.isNotEmpty())
+
+            do {
+                val uuidsWithoutAgent = jvmDao.findAllUuidsByWithoutAgent(customerId)
+                jvmDao.deleteAllByCustomerIdAndUuids(customerId, uuidsWithoutAgent)
+                    .also { logger.info { "[$customerId] $it jvm without agent is swiped." } }
+            } while (uuidsWithoutAgent.isNotEmpty())
         } catch (e: Exception) {
             logger.warn(e) { "[$customerId] error occurred while sweepAgentStates, but ignored. " }
         }
@@ -115,7 +123,7 @@ class GarbageCollectService(
             val fingerPrintUsed = jvmDao.findAllByCustomerId(customerId).mapNotNull { it.codeBaseFingerprint }.toSet()
             val fingerPrintRegistered = codeBaseFingerprintDao.findAllByCustomerId(customerId).map { it.codeBaseFingerprint }.toSet()
             val sweepSubjects = fingerPrintRegistered - fingerPrintUsed
-            codeBaseFingerprintDao.deleteAllByCustomerIdAndCodeBaseFingerprintIn(customerId, fingerPrintRegistered - fingerPrintUsed)
+            codeBaseFingerprintDao.deleteAllByCustomerIdAndCodeBaseFingerprintIn(customerId, sweepSubjects)
             logger.info { "[$customerId] sweep $sweepSubjects codebaseFingerprint" }
         } catch (e: Exception) {
             logger.warn(e) { "[$customerId] error occurred while sweepCodeBaseFingerprints, but ignore. " }

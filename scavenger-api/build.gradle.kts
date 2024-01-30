@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    val kotlinVersion = "1.6.10"
+    val kotlinVersion = "1.8.10"
     val springBootVersion = "2.5.12"
     val springDependencyManagementVersion = "1.0.11.RELEASE"
 
@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":scavenger-entity"))
     implementation(project(":scavenger-schema"))
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.springframework.boot:spring-boot-starter")
@@ -41,7 +42,8 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
     implementation("net.ttddyy:datasource-proxy:1.7")
-    implementation("com.github.vertical-blank:sql-formatter:1.0.1")
+    implementation("com.github.vertical-blank:sql-formatter:2.0.4")
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
@@ -52,19 +54,18 @@ configure<DependencyManagementExtension> {
     }
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
     }
 }
 
-tasks.withType<Jar> {
-    archiveFileName.set("${project.name}.jar")
-}
-
 tasks.withType<BootJar> {
-    archiveFileName.set("${project.name}-boot.jar")
+    archiveFileName.set("${project.name}-${project.version}.jar")
 }
 
 tasks.withType<ProcessResources> {

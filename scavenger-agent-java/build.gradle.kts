@@ -6,10 +6,15 @@ plugins {
     `maven-publish`
     signing
     id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("io.freefair.lombok") version "6.5.1"
+    id("io.freefair.lombok") version "6.6.3"
+    id("org.unbroken-dome.test-sets") version "4.0.0"
 }
 
 java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+
     withJavadocJar()
     withSourcesJar()
 }
@@ -38,18 +43,17 @@ tasks.register<ConfigureShadowRelocation>("relocateShadowJar") {
     prefix = "sc"
 }
 
-tasks.build {
+tasks.assemble {
     dependsOn(tasks.shadowJar)
+}
+
+tasks.check {
+    dependsOn("integrationTest")
 }
 
 tasks.test {
     useJUnitPlatform()
     dependsOn(":scavenger-demo:build")
-}
-
-tasks.withType<JavaCompile> {
-    sourceCompatibility = "8"
-    targetCompatibility = "8"
 }
 
 repositories {
@@ -58,9 +62,9 @@ repositories {
 
 dependencies {
     implementation(project(":scavenger-model"))
-    implementation("net.bytebuddy:byte-buddy:1.12.6")
-    implementation("org.ow2.asm:asm:9.2")
-    implementation("org.ow2.asm:asm-tree:9.2")
+    implementation("net.bytebuddy:byte-buddy:1.14.3")
+    implementation("org.ow2.asm:asm:9.5")
+    implementation("org.ow2.asm:asm-tree:9.5")
     implementation("com.squareup.okhttp3:okhttp:3.14.9")
     implementation("com.google.protobuf:protobuf-java-util:${property("protobufVersion")}")
     implementation("io.grpc:grpc-stub:${property("grpcVersion")}")
@@ -70,6 +74,41 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.22.0")
     testImplementation("org.mockito:mockito-inline:4.3.1")
+}
+
+testSets {
+    create("integrationTest")
+}
+
+dependencies {
+    "integrationTestImplementation"("org.springframework.boot:spring-boot-starter-test:2.5.12")
+    "integrationTestImplementation"("org.springframework.boot:spring-boot-starter-aop:2.5.12")
+    "integrationTestImplementation"("com.github.tomakehurst:wiremock:2.27.2")
+    "integrationTestImplementation"("org.grpcmock:grpcmock-junit5:0.9.4")
+}
+
+fun javaPaths(vararg versions: Int) = versions.joinToString(",",
+    transform = { version: Int ->
+        "$version:" + javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(version))
+        }.get().executablePath
+    })
+
+val integrationTestRuntimeClasspath = configurations.named("integrationTestRuntimeClasspath").get().asPath
+
+tasks.named<Test>("integrationTest") {
+    dependsOn(tasks.shadowJar)
+    mustRunAfter(tasks.jar)
+    shouldRunAfter(tasks.test)
+    useJUnitPlatform()
+
+    inputs.files(file("build.gradle.kts"))
+    inputs.files(tasks.shadowJar.get().outputs.files)
+    outputs.dir(file("$buildDir/test-results/integrationTest"))
+
+    systemProperty("integrationTest.scavengerAgent", tasks.shadowJar.get().outputs.files.asPath)
+    systemProperty("integrationTest.classpath", "build/classes/java/integrationTest:$integrationTestRuntimeClasspath")
+    systemProperty("integrationTest.javaPaths", javaPaths(8, 11, 17, 21))
 }
 
 tasks.withType<ProcessResources> {
@@ -117,6 +156,11 @@ publishing {
                         id.set("junoyoon")
                         name.set("JunHo Yoon")
                         email.set("junoyoon@gmail.com")
+                    }
+                    developer {
+                        id.set("sohyun-ku")
+                        name.set("Sohyun Ku")
+                        email.set("kusohyeon@gmail.com")
                     }
                 }
                 scm {

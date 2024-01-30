@@ -1,8 +1,8 @@
 package com.navercorp.scavenger.service
 
-import com.navercorp.scavenger.entity.AgentState
-import com.navercorp.scavenger.entity.CodeBaseFingerprint
-import com.navercorp.scavenger.entity.Jvm
+import com.navercorp.scavenger.entity.AgentStateEntity
+import com.navercorp.scavenger.entity.CodeBaseFingerprintEntity
+import com.navercorp.scavenger.entity.JvmEntity
 import com.navercorp.scavenger.repository.AgentStateDao
 import com.navercorp.scavenger.repository.CodeBaseFingerprintDao
 import com.navercorp.scavenger.repository.InvocationDao
@@ -47,15 +47,15 @@ class GarbageCollectServiceTest {
     @Nested
     @DisplayName("if expired agent state exists")
     inner class ExpiredAgentStateAndJvm {
-        private lateinit var expiredJvm: Jvm
-        private lateinit var expiredAgentState: AgentState
+        private lateinit var expiredJvmEntity: JvmEntity
+        private lateinit var expiredAgentState: AgentStateEntity
         val now = Instant.now()
         val ago = now.minus(600 + IntervalService.Companion.GC_DEAD_MARGIN_MINUTES * 60, ChronoUnit.SECONDS)
 
         @BeforeEach
         fun prepareExpiredAgentState() {
             expiredAgentState = agentStateDao.insert(
-                AgentState(
+                AgentStateEntity(
                     customerId = customerId,
                     jvmUuid = "uuid",
                     createdAt = ago,
@@ -65,8 +65,8 @@ class GarbageCollectServiceTest {
                     enabled = true,
                 )
             )
-            expiredJvm = jvmDao.insert(
-                Jvm(
+            expiredJvmEntity = jvmDao.insert(
+                JvmEntity(
                     customerId = customerId,
                     applicationId = 1,
                     environmentId = 1,
@@ -78,7 +78,7 @@ class GarbageCollectServiceTest {
                 )
             )
 
-            assertThat(jvmDao.findById(expiredJvm.id)).isPresent
+            assertThat(jvmDao.findById(expiredJvmEntity.id)).isPresent
             assertThat(agentStateDao.findById(expiredAgentState.id)).isPresent
         }
 
@@ -87,7 +87,7 @@ class GarbageCollectServiceTest {
         fun sweepAgentStates_removeWhenAgentExpired() {
             sut.sweepAgentStatesAndJvms(customerId, now.plusSeconds(3000))
             assertThat(agentStateDao.findById(expiredAgentState.id)).isEmpty
-            assertThat(jvmDao.findById(expiredJvm.id)).isEmpty
+            assertThat(jvmDao.findById(expiredJvmEntity.id)).isEmpty
         }
 
         @Test
@@ -95,7 +95,7 @@ class GarbageCollectServiceTest {
         fun sweepAgentStates_notRemoveWhenAgentExpired() {
             sut.sweepAgentStatesAndJvms(customerId, now)
             assertThat(agentStateDao.findById(expiredAgentState.id)).isNotEmpty
-            assertThat(jvmDao.findById(expiredJvm.id)).isNotEmpty
+            assertThat(jvmDao.findById(expiredJvmEntity.id)).isNotEmpty
         }
     }
 
@@ -112,12 +112,12 @@ class GarbageCollectServiceTest {
                 codeBaseFingerprintDao.deleteById(it.id)
             }
 
-            val finger = CodeBaseFingerprint(codeBaseFingerprint = "finger1", applicationId = 1, customerId = customerId, publishedAt = ago)
+            val finger = CodeBaseFingerprintEntity(codeBaseFingerprint = "finger1", applicationId = 1, customerId = customerId, publishedAt = ago)
             for (i in 1..3) {
                 codeBaseFingerprintDao.insert(finger.copy(codeBaseFingerprint = "finger$i"))
             }
 
-            val jvm = Jvm(
+            val jvmEntity = JvmEntity(
                 customerId = customerId,
                 applicationId = 1,
                 environmentId = 1,
@@ -129,7 +129,7 @@ class GarbageCollectServiceTest {
             )
 
             for (i in 1..3) {
-                jvmDao.insert(jvm.copy(uuid = "jvmUuid$i", codeBaseFingerprint = "finger$i"))
+                jvmDao.insert(jvmEntity.copy(uuid = "jvmUuid$i", codeBaseFingerprint = "finger$i"))
             }
         }
 
@@ -170,6 +170,9 @@ class GarbageCollectServiceTest {
             min = allLiveFingerprints.minByOrNull { it.createdAt }?.createdAt ?: Instant.now()
             methodDao.update(methods[0].copy(lastSeenAtMillis = min?.minusMillis(weekAgo)?.toEpochMilli()))
             methodDao.update(methods[1].copy(lastSeenAtMillis = min?.minusMillis(weekAgo)?.toEpochMilli()))
+            methodDao.update(methods[2].copy(lastSeenAtMillis = min?.toEpochMilli()))
+            methodDao.update(methods[3].copy(lastSeenAtMillis = min?.toEpochMilli()))
+            methodDao.update(methods[4].copy(lastSeenAtMillis = min?.toEpochMilli()))
         }
 
         @Test
@@ -194,14 +197,14 @@ class GarbageCollectServiceTest {
             sut.sweepMethods(customerId, min!!)
             assertThat(methodDao.findAllByCustomerId(customerId))
                 .describedAs("nothing is deleted when the 1 week is not passed since last seen")
-                .hasSize(5)
+                .hasSize(34)
             assertThat(invocationDao.findAllByCustomerId(customerId))
                 .describedAs("invocations should be same as before")
                 .hasSize(invocations.size)
             sut.sweepMethods(customerId, min!!.plusSeconds(10))
             assertThat(methodDao.findAllByCustomerId(customerId))
                 .describedAs("marked method is deleted when the more than 1 week is passed after last seen")
-                .hasSize(3)
+                .hasSize(32)
             val invocationsAfter = invocationDao.findAllByCustomerId(customerId)
             assertThat(invocationsAfter)
                 .describedAs("invocations should be deleted as well")
@@ -209,7 +212,7 @@ class GarbageCollectServiceTest {
             sut.sweepMethods(customerId, Instant.now())
             assertThat(methodDao.findAllByCustomerId(customerId))
                 .describedAs("nothing more is deleted when no marking is done")
-                .hasSize(3)
+                .hasSize(32)
         }
 
         @Test
@@ -222,14 +225,14 @@ class GarbageCollectServiceTest {
             sut.sweepMethods(customerId, min!!)
             assertThat(methodDao.findAllByCustomerId(customerId))
                 .describedAs("nothing is deleted when the 1 week is not passed since last seen")
-                .hasSize(5)
+                .hasSize(34)
             assertThat(invocationDao.findAllByCustomerId(customerId))
                 .describedAs("invocations should be same as before")
                 .hasSize(invocations.size)
             sut.sweepMethods(customerId, min!!.plusSeconds(10))
             assertThat(methodDao.findAllByCustomerId(customerId))
                 .describedAs("marked method is deleted when the more than 1 week is passed after last seen")
-                .hasSize(3)
+                .hasSize(32)
             val invocationsAfter = invocationDao.findAllByCustomerId(customerId)
             assertThat(invocationsAfter)
                 .describedAs("invocations should be deleted as well")
@@ -237,7 +240,66 @@ class GarbageCollectServiceTest {
             sut.sweepMethods(customerId, Instant.now())
             assertThat(methodDao.findAllByCustomerId(customerId))
                 .describedAs("nothing more is deleted when no marking is done")
-                .hasSize(3)
+                .hasSize(32)
+        }
+    }
+
+    @Nested
+    @DisplayName("if without agent state exists")
+    inner class WithoutAgentJvms {
+        val now = Instant.now()
+        val ago = now.minus(600 + IntervalService.Companion.GC_DEAD_MARGIN_MINUTES * 60, ChronoUnit.SECONDS)
+
+        @BeforeEach
+        fun beforeEach() {
+            // Clean up first
+            jvmDao.findAllByCustomerId(customerId).forEach {
+                jvmDao.deleteById(it.id)
+            }
+
+            jvmDao.insert(
+                JvmEntity(
+                    customerId = customerId,
+                    applicationId = 1,
+                    environmentId = 1,
+                    uuid = "uuid",
+                    codeBaseFingerprint = null,
+                    createdAt = ago,
+                    publishedAt = ago,
+                    hostname = "hostname",
+                )
+            )
+
+            jvmDao.insert(
+                JvmEntity(
+                    customerId = customerId,
+                    applicationId = 1,
+                    environmentId = 1,
+                    uuid = "withoutUUID",
+                    codeBaseFingerprint = null,
+                    createdAt = ago,
+                    publishedAt = ago,
+                    hostname = "hostname",
+                )
+            )
+
+            agentStateDao.insert(
+                AgentStateEntity(
+                    customerId = customerId,
+                    jvmUuid = "uuid",
+                    createdAt = ago,
+                    lastPolledAt = ago,
+                    nextPollExpectedAt = ago.plusSeconds(60),
+                    timestamp = ago,
+                    enabled = true,
+                )
+            )
+        }
+
+        @Test
+        fun sweepAgentStatesAndJvms_removeWithoutAgentJvms() {
+            sut.sweepAgentStatesAndJvms(customerId, now)
+            assertThat(jvmDao.findAllByCustomerId(customerId).size).isEqualTo(1)
         }
     }
 }

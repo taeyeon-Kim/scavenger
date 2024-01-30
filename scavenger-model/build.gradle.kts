@@ -1,14 +1,9 @@
-import com.google.protobuf.gradle.builtins
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.plugins
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
+import com.google.protobuf.gradle.*
 
 plugins {
     java
     idea
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.8.10"
     id("com.google.protobuf") version "0.8.18"
 }
 
@@ -24,9 +19,8 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 }
 
-tasks.withType<JavaCompile> {
-    sourceCompatibility = "8"
-    targetCompatibility = "8"
+kotlin {
+    jvmToolchain(8)
 }
 
 protobuf {

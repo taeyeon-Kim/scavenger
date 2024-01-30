@@ -1,6 +1,6 @@
 package com.navercorp.scavenger.repository.sql
 
-import com.navercorp.scavenger.entity.AgentState
+import com.navercorp.scavenger.entity.AgentStateEntity
 import com.navercorp.spring.data.jdbc.plus.sql.support.SqlGeneratorSupport
 
 class AgentStateSql : SqlGeneratorSupport() {
@@ -17,24 +17,16 @@ class AgentStateSql : SqlGeneratorSupport() {
             AND jvmUuid = :jvmUuid
         """.trimIndent()
 
-    fun selectGarbageLastPolledAtBefore(): String =
+    fun selectAllGarbageLastPolledAtBefore(): String =
         """
         SELECT
-           ${sql.columns(AgentState::class.java)}
+           ${sql.columns(AgentStateEntity::class.java)}
         FROM
             agent_state
         WHERE
             customerId = :customerId
             AND lastPolledAt < :lastPolledAt
-        """.trimIndent()
-
-    fun deleteGarbageLastPolledAtBefore(): String =
-        """
-        DELETE FROM
-            agent_state
-        WHERE
-            customerId = :customerId
-            AND lastPolledAt < :lastPolledAt
+        LIMIT 10000
         """.trimIndent()
 
     fun deleteAllByCustomerIdAndIds(): String =

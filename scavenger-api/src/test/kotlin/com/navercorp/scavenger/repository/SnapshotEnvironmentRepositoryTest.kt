@@ -1,6 +1,6 @@
 package com.navercorp.scavenger.repository
 
-import com.navercorp.scavenger.entity.EnvironmentRef
+import com.navercorp.scavenger.entity.EnvironmentRefEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,26 +22,26 @@ class SnapshotEnvironmentRepositoryTest {
     }
 
     @Test
-    fun findByCustomerIdAndApplicationId() {
-        assertThat(sut.findByCustomerIdAndEnvironmentId(customerId, environmentId)).hasSizeGreaterThan(0)
+    fun findAllByCustomerIdAndEnvironmentId() {
+        assertThat(sut.findAllByCustomerIdAndEnvironmentId(customerId, environmentId)).hasSizeGreaterThan(0)
     }
 
     @Test
     @Transactional
     fun deleteByCustomerIdAndSnapshotId() {
         sut.deleteByCustomerIdAndSnapshotId(customerId, snapshotId)
-        assertThat(sut.findByCustomerIdAndSnapshotId(customerId, snapshotId)).hasSize(0)
+        assertThat(sut.findAllByCustomerIdAndSnapshotId(customerId, snapshotId)).hasSize(0)
     }
 
     @Test
     @Transactional
     fun insertAll() {
         val param = listOf(
-            EnvironmentRef(customerId = 0, environmentId = 1, snapshotId = 1),
-            EnvironmentRef(customerId = 0, environmentId = 1, snapshotId = 2)
+            EnvironmentRefEntity(customerId = 0, environmentId = 1, snapshotId = 1),
+            EnvironmentRefEntity(customerId = 0, environmentId = 1, snapshotId = 2)
         ).toSet()
         sut.insertAll(param)
 
-        assertThat(sut.findByCustomerIdAndEnvironmentId(0, 1)).hasSize(2)
+        assertThat(sut.findAllByCustomerIdAndEnvironmentId(0, 1)).hasSize(2)
     }
 }
