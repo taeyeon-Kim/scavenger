@@ -107,6 +107,7 @@ jobs:
           collation server: 'utf8mb4_0900_as_cs'
           mysql version: '8.0.28'
           mysql database: 'scavenger'
+          mysql root password: 'scavenger'
           mysql user: 'scavenger'
           mysql password: 'scavenger'
       - name: Wait for MySQL
