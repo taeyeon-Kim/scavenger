@@ -94,6 +94,21 @@ jobs:
           path: scavenger-api/build/test-results
   scavenger-schema:
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: scavenger
+          MYSQL_DATABASE: scavenger
+          MYSQL_USER: scavenger
+          MYSQL_PASSWORD: scavenger
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v3
       - name: Setup Java JDK
@@ -101,19 +116,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          character set server: utf8mb4
-          collation server: utf8mb4_bin
-          mysql version: '5.6.17'
-          mysql database: wikidot_notifier_test
-          mysql root password: root
-      - name: Wait for MySQL
-        run: |
-          while ! mysqladmin ping -h 127.0.0.1 -p root --silent; do
-            sleep 1
-          done
       - name: Gradle Caching
         uses: actions/cache@v3
         with:
