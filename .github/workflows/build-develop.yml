@@ -95,8 +95,8 @@ jobs:
   scavenger-schema:
     runs-on: ubuntu-latest
     services:
-      db:
-        image: mysql:8.0
+      database:
+        image: mysql:8.0.28
         ports:
           - 3306:3306
         env:
@@ -126,4 +126,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: SPRING_PROFILES_ACTIVE=mysql ./gradlew :scavenger-collector:clean scavenger-collector:test --tests ScavengerCollectorApplicationTest \
+        run: SPRING_PROFILES_ACTIVE=mysql ./gradlew :scavenger-collector:clean scavenger-collector:test --tests ScavengerCollectorApplicationTest
