@@ -101,8 +101,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - name: Shutdown Ubuntu MySQL
-        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
       - uses: mirromutth/mysql-action@v1.1
         with:
           character set server: 'utf8'
@@ -111,6 +109,11 @@ jobs:
           mysql database: 'scavenger'
           mysql user: 'scavenger'
           mysql password: 'scavenger'
+      - name: Wait for MySQL
+        run: |
+          while ! mysqladmin ping --host=127.0.0.1 -p=scavenger --silent; do
+            sleep 1
+          done
       - name: Gradle Caching
         uses: actions/cache@v3
         with:
