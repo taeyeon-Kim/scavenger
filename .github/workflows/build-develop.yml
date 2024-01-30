@@ -112,7 +112,7 @@ jobs:
           mysql password: scavenger
       - name: Wait for MySQL
         run: |
-          while ! mysqladmin ping --host=127.0.0.1 -p=scavenger --silent; do
+          while ! mysqladmin ping --host=127.0.0.1 -p scavenger --silent; do
             sleep 1
           done
       - name: Gradle Caching
